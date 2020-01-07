@@ -260,3 +260,27 @@ plus_maybe a b = [| a + b |]
 -- Можно так: plus_maybe a b = pure plus <*> a <*> b
 -- Или так: plus_maybe a b = pure (!a + !b)
 --      `!a` - эквивалентно: `va <- a` и использовать `va`
+
+
+----- Пропуски
+cong' : {f :  a -> b} -> x = y -> f x = f y
+cong' Refl = Refl
+
+---- Пропуски
+data Parity : Nat -> Type where
+  Even : Parity (n + n)
+  Odd  : Parity (S (n + n))
+
+proof_even : Parity ((S n) + (S n)) -> Parity (S (S (plus n n)))
+proof_even {n} prf = rewrite plusSuccRightSucc n n in prf
+
+
+proof_odd : Parity (S ((S n) + (S n))) -> Parity (S (S (S (plus n n))))
+proof_odd {n} prf = rewrite plusSuccRightSucc n n in prf
+
+parity : (n: Nat) -> Parity n
+parity Z = Even {n = Z}
+parity (S Z) = Odd {n = Z}
+parity (S (S k)) with (parity k)
+  parity (S (S (n + n))) | Even = proof_even (Even {n = S n})
+  parity (S (S (S (n + n)))) | Odd = proof_odd (Odd {n = S n})
